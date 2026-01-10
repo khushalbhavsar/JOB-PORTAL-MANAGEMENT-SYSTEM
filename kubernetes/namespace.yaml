@@ -1,0 +1,39 @@
+# ============================================================
+# Job Portal Kubernetes Namespace
+# ============================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jobportal
+  labels:
+    app.kubernetes.io/name: jobportal
+    app.kubernetes.io/managed-by: argocd
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: jobportal-quota
+  namespace: jobportal
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "16"
+    limits.memory: 32Gi
+    pods: "50"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: jobportal-limits
+  namespace: jobportal
+spec:
+  limits:
+    - default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      type: Container

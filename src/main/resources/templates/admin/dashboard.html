@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>JobPortal <span class="badge bg-danger">Admin</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" id="userName"></span>
+                <a class="btn btn-outline-light btn-sm" href="#" onclick="Auth.logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-none d-md-block sidebar py-4">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#users" onclick="showSection('users')">
+                                <i class="fas fa-users me-2"></i>Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#recruiters" onclick="showSection('recruiters')">
+                                <i class="fas fa-building me-2"></i>Recruiters
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#jobs" onclick="showSection('jobs')">
+                                <i class="fas fa-briefcase me-2"></i>Jobs
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto px-4 py-4">
+                <!-- Dashboard Section -->
+                <section id="dashboardSection">
+                    <h4 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h4>
+                    
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card dashboard-card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Total Users</h6>
+                                            <h2 id="totalUsers">0</h2>
+                                        </div>
+                                        <i class="fas fa-users fa-2x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card dashboard-card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Total Jobs</h6>
+                                            <h2 id="totalJobs">0</h2>
+                                        </div>
+                                        <i class="fas fa-briefcase fa-2x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card dashboard-card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Applications</h6>
+                                            <h2 id="totalApplications">0</h2>
+                                        </div>
+                                        <i class="fas fa-file-alt fa-2x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card dashboard-card bg-warning text-dark">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Pending Verifications</h6>
+                                            <h2 id="pendingVerifications">0</h2>
+                                        </div>
+                                        <i class="fas fa-clock fa-2x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h6 class="mb-0">User Distribution</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <h4 class="text-primary" id="jobSeekerCount">0</h4>
+                                            <small>Job Seekers</small>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-success" id="recruiterCount">0</h4>
+                                            <small>Recruiters</small>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-info" id="activeJobsCount">0</h4>
+                                            <small>Active Jobs</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h6 class="mb-0">Pending Recruiter Approvals</h6>
+                                </div>
+                                <div class="card-body" id="pendingRecruiters">
+                                    <p class="text-muted">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="usersSection" class="d-none">
+                    <h4 class="mb-4"><i class="fas fa-users me-2"></i>User Management</h4>
+                    <div class="card shadow-sm">
+                        <div class="card-body" id="usersList">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recruiters Section -->
+                <section id="recruitersSection" class="d-none">
+                    <h4 class="mb-4"><i class="fas fa-building me-2"></i>Recruiter Management</h4>
+                    <div class="card shadow-sm">
+                        <div class="card-body" id="recruitersList">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!Auth.isLoggedIn() || Auth.getUser().role !== 'ADMIN') {
+                window.location.href = '/login';
+                return;
+            }
+
+            document.getElementById('userName').textContent = `Admin: ${Auth.getUser().name}`;
+            loadDashboardStats();
+            loadPendingRecruiters();
+        });
+
+        async function loadDashboardStats() {
+            try {
+                const result = await API.get('/admin/stats');
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                    document.getElementById('totalJobs').textContent = stats.totalJobs || 0;
+                    document.getElementById('totalApplications').textContent = stats.totalApplications || 0;
+                    document.getElementById('pendingVerifications').textContent = stats.pendingVerifications || 0;
+                    document.getElementById('jobSeekerCount').textContent = stats.totalJobSeekers || 0;
+                    document.getElementById('recruiterCount').textContent = stats.totalRecruiters || 0;
+                    document.getElementById('activeJobsCount').textContent = stats.activeJobs || 0;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadPendingRecruiters() {
+            try {
+                const result = await API.get('/admin/recruiters/pending');
+                const container = document.getElementById('pendingRecruiters');
+                
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = result.data.slice(0, 5).map(r => `
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                            <div>
+                                <strong>${r.companyName}</strong>
+                                <br><small class="text-muted">${r.email}</small>
+                            </div>
+                            <button class="btn btn-sm btn-success" onclick="verifyRecruiter(${r.recruiterId})">
+                                <i class="fas fa-check"></i> Verify
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-success mb-0"><i class="fas fa-check-circle me-2"></i>All recruiters verified</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function verifyRecruiter(recruiterId) {
+            try {
+                const result = await API.put(`/admin/recruiters/${recruiterId}/verify`);
+                if (result.success) {
+                    Utils.showToast('Recruiter verified successfully');
+                    loadDashboardStats();
+                    loadPendingRecruiters();
+                }
+            } catch (error) {
+                Utils.showToast('Error verifying recruiter', 'error');
+            }
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('d-none'));
+            document.getElementById(section + 'Section').classList.remove('d-none');
+            
+            document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (section === 'users') loadUsers();
+            if (section === 'recruiters') loadRecruiters();
+        }
+
+        async function loadUsers() {
+            try {
+                const result = await API.get('/admin/users?page=0&size=20');
+                const container = document.getElementById('usersList');
+                
+                if (result.success) {
+                    container.innerHTML = `
+                        <table class="table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                ${result.data.content.map(u => `
+                                    <tr>
+                                        <td>${u.name}</td>
+                                        <td>${u.email}</td>
+                                        <td><span class="badge bg-secondary">${u.role}</span></td>
+                                        <td>${u.isActive ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-warning" onclick="toggleUser(${u.userId})">
+                                                <i class="fas fa-power-off"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadRecruiters() {
+            try {
+                const result = await API.get('/admin/recruiters?page=0&size=20');
+                const container = document.getElementById('recruitersList');
+                
+                if (result.success) {
+                    container.innerHTML = `
+                        <table class="table">
+                            <thead><tr><th>Company</th><th>Contact</th><th>Jobs</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                ${result.data.content.map(r => `
+                                    <tr>
+                                        <td>${r.companyName}</td>
+                                        <td>${r.email}</td>
+                                        <td>${r.jobCount || 0}</td>
+                                        <td>${r.isVerified ? '<span class="badge bg-success">Verified</span>' : '<span class="badge bg-warning">Pending</span>'}</td>
+                                        <td>
+                                            ${!r.isVerified ? `<button class="btn btn-sm btn-success" onclick="verifyRecruiter(${r.recruiterId})"><i class="fas fa-check"></i></button>` : ''}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function toggleUser(userId) {
+            try {
+                const result = await API.put(`/admin/users/${userId}/toggle-status`);
+                if (result.success) {
+                    Utils.showToast('User status updated');
+                    loadUsers();
+                }
+            } catch (error) {
+                Utils.showToast('Error updating user', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

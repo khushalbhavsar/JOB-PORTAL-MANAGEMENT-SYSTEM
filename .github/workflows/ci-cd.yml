@@ -1,0 +1,214 @@
+# ============================================================
+# CI/CD Pipeline for Job Portal Microservices
+# Builds, tests, and deploys to Amazon EKS via ArgoCD
+# ============================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'services/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'services/**'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+  EKS_CLUSTER: jobportal-eks
+
+jobs:
+  # ==================== Detect Changes ====================
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
+      auth-service: ${{ steps.filter.outputs.auth-service }}
+      job-service: ${{ steps.filter.outputs.job-service }}
+      application-service: ${{ steps.filter.outputs.application-service }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            api-gateway:
+              - 'services/api-gateway/**'
+            auth-service:
+              - 'services/auth-service/**'
+            job-service:
+              - 'services/job-service/**'
+            application-service:
+              - 'services/application-service/**'
+
+  # ==================== Build & Test ====================
+  build:
+    name: Build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: changes
+    strategy:
+      matrix:
+        include:
+          - service: api-gateway
+            path: services/api-gateway
+            port: 8080
+          - service: auth-service
+            path: services/auth-service
+            port: 8081
+          - service: job-service
+            path: services/job-service
+            port: 8083
+          - service: application-service
+            path: services/application-service
+            port: 8084
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        working-directory: ${{ matrix.path }}
+        run: |
+          mvn clean package -DskipTests -B
+
+      - name: Run Tests
+        working-directory: ${{ matrix.path }}
+        run: |
+          mvn test -B
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}-jar
+          path: ${{ matrix.path }}/target/*.jar
+          retention-days: 1
+
+  # ==================== Build & Push Docker Images ====================
+  docker:
+    name: Docker ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: [changes, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        include:
+          - service: api-gateway
+            path: services/api-gateway
+          - service: auth-service
+            path: services/auth-service
+          - service: job-service
+            path: services/job-service
+          - service: application-service
+            path: services/application-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.service }}-jar
+          path: ${{ matrix.path }}/target
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.path }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/jobportal/${{ matrix.service }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/jobportal/${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==================== Update GitOps Repo ====================
+  gitops:
+    name: Update GitOps
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          path: gitops
+
+      - name: Update image tags
+        run: |
+          cd gitops/helm
+          
+          # Update each service's values.yaml with new image tag
+          for service in api-gateway auth-service job-service application-service; do
+            if [ -f "${service}/values.yaml" ]; then
+              sed -i "s/tag: .*/tag: ${{ github.sha }}/" ${service}/values.yaml
+            fi
+          done
+
+      - name: Commit and push changes
+        run: |
+          cd gitops
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "Update image tags to ${{ github.sha }}"
+          git push
+
+  # ==================== Security Scan ====================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+  # ==================== Notify ====================
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [docker, gitops]
+    if: always()
+    steps:
+      - name: Send notification
+        run: |
+          echo "Pipeline completed!"
+          echo "Commit: ${{ github.sha }}"
+          echo "Status: ${{ needs.docker.result }}"

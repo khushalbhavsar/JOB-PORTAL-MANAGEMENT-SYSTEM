@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>JobPortal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/jobs">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/companies">Companies</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="authButtons">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm ms-2" href="/register">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <!-- Loading -->
+        <div id="loading" class="text-center py-5">
+            <div class="loading-spinner"></div>
+            <p class="mt-3">Loading profile...</p>
+        </div>
+
+        <!-- Not Logged In -->
+        <div id="notLoggedIn" class="d-none text-center py-5">
+            <i class="fas fa-user-lock fa-4x text-muted mb-4"></i>
+            <h3>Please Login</h3>
+            <p class="text-muted">You need to be logged in to view your profile.</p>
+            <a href="/login" class="btn btn-primary">Login Now</a>
+        </div>
+
+        <!-- Profile Content -->
+        <div id="profileContent" class="d-none">
+            <div class="row">
+                <!-- Profile Card -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="profile-avatar mb-3">
+                                <i class="fas fa-user-circle fa-6x text-primary"></i>
+                            </div>
+                            <h4 id="profileName"></h4>
+                            <p class="text-muted mb-2" id="profileEmail"></p>
+                            <span class="badge bg-primary" id="profileRole"></span>
+                            <hr>
+                            <p class="mb-1"><i class="fas fa-phone me-2"></i><span id="profilePhone">Not provided</span>
+                            </p>
+                            <p class="mb-0"><i class="fas fa-calendar me-2"></i>Member since <span
+                                    id="memberSince"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Details -->
+                <div class="col-lg-8">
+                    <!-- Edit Profile Form -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Profile</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="editName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="editEmail" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Phone</label>
+                                        <input type="tel" class="form-control" id="editPhone">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" class="form-control" id="editAddress">
+                                    </div>
+                                </div>
+
+                                <!-- Job Seeker Specific Fields -->
+                                <div id="seekerFields" class="d-none">
+                                    <hr>
+                                    <h6 class="mb-3">Professional Information</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Skills</label>
+                                            <textarea class="form-control" id="editSkills" rows="2"
+                                                placeholder="Java, Python, React..."></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Experience</label>
+                                            <input type="text" class="form-control" id="editExperience"
+                                                placeholder="3 years">
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Education</label>
+                                            <textarea class="form-control" id="editEducation" rows="2"
+                                                placeholder="B.Tech Computer Science..."></textarea>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Resume URL</label>
+                                            <input type="url" class="form-control" id="editResume"
+                                                placeholder="https://example.com/resume.pdf">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recruiter Specific Fields -->
+                                <div id="recruiterFields" class="d-none">
+                                    <hr>
+                                    <h6 class="mb-3">Company Information</h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Company Name</label>
+                                            <input type="text" class="form-control" id="editCompanyName">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Industry</label>
+                                            <input type="text" class="form-control" id="editIndustry">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Company Website</label>
+                                            <input type="url" class="form-control" id="editWebsite">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Headquarters</label>
+                                            <input type="text" class="form-control" id="editHeadquarters">
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Company Description</label>
+                                            <textarea class="form-control" id="editCompanyDescription"
+                                                rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" id="saveBtn">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="fas fa-lock me-2"></i>Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="passwordForm">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Current Password</label>
+                                        <input type="password" class="form-control" id="currentPassword" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">New Password</label>
+                                        <input type="password" class="form-control" id="newPassword" required
+                                            minlength="6">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Confirm Password</label>
+                                        <input type="password" class="form-control" id="confirmPassword" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2026 Job Portal Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            updateNavigation();
+
+            if (!Auth.isLoggedIn()) {
+                document.getElementById('loading').classList.add('d-none');
+                document.getElementById('notLoggedIn').classList.remove('d-none');
+                return;
+            }
+
+            loadProfile();
+        });
+
+        async function loadProfile() {
+            try {
+                const result = await API.get('/auth/me');
+
+                document.getElementById('loading').classList.add('d-none');
+
+                if (result.success && result.data) {
+                    displayProfile(result.data);
+                    document.getElementById('profileContent').classList.remove('d-none');
+                } else {
+                    document.getElementById('notLoggedIn').classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('loading').classList.add('d-none');
+                document.getElementById('notLoggedIn').classList.remove('d-none');
+            }
+        }
+
+        function displayProfile(user) {
+            document.getElementById('profileName').textContent = user.name;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileRole').textContent = user.role.replace('_', ' ');
+            document.getElementById('profilePhone').textContent = user.phone || 'Not provided';
+            document.getElementById('memberSince').textContent = Utils.formatDate(user.createdAt);
+
+            // Populate edit form
+            document.getElementById('editName').value = user.name || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editPhone').value = user.phone || '';
+            document.getElementById('editAddress').value = user.address || '';
+
+            // Show role-specific fields
+            if (user.role === 'JOB_SEEKER') {
+                document.getElementById('seekerFields').classList.remove('d-none');
+                document.getElementById('editSkills').value = user.skills || '';
+                document.getElementById('editExperience').value = user.experience || '';
+                document.getElementById('editEducation').value = user.education || '';
+                document.getElementById('editResume').value = user.resumeUrl || '';
+            } else if (user.role === 'RECRUITER') {
+                document.getElementById('recruiterFields').classList.remove('d-none');
+                // Load recruiter profile
+                loadRecruiterProfile();
+            }
+        }
+
+        async function loadRecruiterProfile() {
+            try {
+                const result = await API.get('/recruiters/profile');
+                if (result.success && result.data) {
+                    document.getElementById('editCompanyName').value = result.data.companyName || '';
+                    document.getElementById('editIndustry').value = result.data.industry || '';
+                    document.getElementById('editWebsite').value = result.data.companyWebsite || '';
+                    document.getElementById('editHeadquarters').value = result.data.headquarters || '';
+                    document.getElementById('editCompanyDescription').value = result.data.companyDescription || '';
+                }
+            } catch (error) {
+                console.error('Error loading recruiter profile:', error);
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const user = Auth.getUser();
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+
+            try {
+                const updateData = {
+                    name: document.getElementById('editName').value,
+                    phone: document.getElementById('editPhone').value,
+                    address: document.getElementById('editAddress').value
+                };
+
+                if (user.role === 'JOB_SEEKER') {
+                    updateData.skills = document.getElementById('editSkills').value;
+                    updateData.experience = document.getElementById('editExperience').value;
+                    updateData.education = document.getElementById('editEducation').value;
+                    updateData.resumeUrl = document.getElementById('editResume').value;
+
+                    const result = await API.put('/users/profile', updateData);
+                    if (result.success) {
+                        Utils.showToast('Profile updated successfully!');
+                        // Update local storage
+                        const currentUser = Auth.getUser();
+                        currentUser.name = updateData.name;
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                    } else {
+                        Utils.showToast(result.message || 'Failed to update profile', 'error');
+                    }
+                } else if (user.role === 'RECRUITER') {
+                    updateData.companyName = document.getElementById('editCompanyName').value;
+                    updateData.industry = document.getElementById('editIndustry').value;
+                    updateData.companyWebsite = document.getElementById('editWebsite').value;
+                    updateData.headquarters = document.getElementById('editHeadquarters').value;
+                    updateData.companyDescription = document.getElementById('editCompanyDescription').value;
+
+                    const result = await API.put('/recruiters/profile', updateData);
+                    if (result.success) {
+                        Utils.showToast('Profile updated successfully!');
+                        const currentUser = Auth.getUser();
+                        currentUser.name = updateData.name;
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                    } else {
+                        Utils.showToast(result.message || 'Failed to update profile', 'error');
+                    }
+                }
+            } catch (error) {
+                Utils.showToast('Error updating profile', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                Utils.showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const result = await API.put('/users/change-password', {
+                    currentPassword,
+                    newPassword
+                });
+
+                if (result.success) {
+                    Utils.showToast('Password changed successfully!');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    Utils.showToast(result.message || 'Failed to change password', 'error');
+                }
+            } catch (error) {
+                Utils.showToast('Error changing password', 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

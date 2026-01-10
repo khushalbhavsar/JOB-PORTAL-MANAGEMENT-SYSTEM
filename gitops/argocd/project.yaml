@@ -1,0 +1,55 @@
+# ============================================================
+# ArgoCD Project for Job Portal
+# ============================================================
+
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: jobportal
+  namespace: argocd
+spec:
+  description: Job Portal Microservices Project
+
+  # Source repositories
+  sourceRepos:
+    - 'https://github.com/YOUR_USERNAME/job-portal-gitops.git'
+
+  # Destination clusters and namespaces
+  destinations:
+    - namespace: jobportal
+      server: https://kubernetes.default.svc
+    - namespace: jobportal-staging
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+
+  # Cluster resources whitelist
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRole
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
+
+  # Namespace resources whitelist
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # Roles
+  roles:
+    - name: admin
+      description: Admin access to jobportal project
+      policies:
+        - p, proj:jobportal:admin, applications, *, jobportal/*, allow
+      groups:
+        - jobportal-admins
+
+    - name: developer
+      description: Developer access to jobportal project
+      policies:
+        - p, proj:jobportal:developer, applications, get, jobportal/*, allow
+        - p, proj:jobportal:developer, applications, sync, jobportal/*, allow
+      groups:
+        - jobportal-developers

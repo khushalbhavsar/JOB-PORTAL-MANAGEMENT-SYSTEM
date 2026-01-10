@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details - Job Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>JobPortal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/jobs">Jobs</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="authButtons">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm ms-2" href="/register">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <!-- Loading -->
+        <div id="loading" class="text-center py-5">
+            <div class="loading-spinner"></div>
+            <p class="mt-3">Loading job details...</p>
+        </div>
+
+        <!-- Job Details -->
+        <div id="jobDetails" class="d-none">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Job Header -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h2 class="mb-2" id="jobTitle"></h2>
+                                    <h5 class="text-muted mb-3" id="companyName"></h5>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <span class="badge bg-primary" id="jobType"></span>
+                                        <span class="badge bg-secondary" id="experienceLevel"></span>
+                                        <span class="badge bg-success" id="remote"></span>
+                                    </div>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-map-marker-alt me-2"></i><span id="location"></span>
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-money-bill-wave me-2"></i><span id="salary"></span>
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-primary btn-lg" id="applyBtn" onclick="applyForJob()">
+                                        <i class="fas fa-paper-plane me-2"></i>Apply Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Job Description</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="description"></div>
+                        </div>
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Requirements</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="requirements"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="fas fa-code me-2"></i>Required Skills</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="skills"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Job Info -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Job Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3">
+                                    <strong>Posted Date</strong>
+                                    <p class="text-muted mb-0" id="postedDate"></p>
+                                </li>
+                                <li class="mb-3">
+                                    <strong>Application Deadline</strong>
+                                    <p class="text-muted mb-0" id="deadline"></p>
+                                </li>
+                                <li class="mb-3">
+                                    <strong>Vacancies</strong>
+                                    <p class="text-muted mb-0" id="vacancies"></p>
+                                </li>
+                                <li>
+                                    <strong>Views</strong>
+                                    <p class="text-muted mb-0" id="views"></p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Company Info -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0"><i class="fas fa-building me-2"></i>About Company</h6>
+                        </div>
+                        <div class="card-body">
+                            <h6 id="companyNameSidebar"></h6>
+                            <p class="text-muted small" id="companyWebsite"></p>
+                            <p class="text-muted small" id="companyDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Not Found -->
+        <div id="notFound" class="d-none text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-4"></i>
+            <h3>Job Not Found</h3>
+            <p class="text-muted">The job you're looking for doesn't exist or has been removed.</p>
+            <a href="/jobs" class="btn btn-primary">Browse Jobs</a>
+        </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div class="modal fade" id="applyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Apply for Position</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="applyForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Cover Letter (Optional)</label>
+                            <textarea class="form-control" id="coverLetter" rows="5"
+                                placeholder="Tell us why you're a great fit..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        let jobId;
+        let jobData;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get job ID from URL
+            const pathParts = window.location.pathname.split('/');
+            jobId = pathParts[pathParts.length - 1];
+
+            if (jobId) {
+                loadJobDetails();
+            } else {
+                showNotFound();
+            }
+
+            updateNavigation();
+        });
+
+        async function loadJobDetails() {
+            try {
+                const result = await fetch(`/api/jobs/${jobId}`).then(r => r.json());
+
+                document.getElementById('loading').classList.add('d-none');
+
+                if (result.success && result.data) {
+                    jobData = result.data;
+                    displayJob(jobData);
+                    document.getElementById('jobDetails').classList.remove('d-none');
+                } else {
+                    showNotFound();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotFound();
+            }
+        }
+
+        function displayJob(job) {
+            document.title = `${job.title} - ${job.companyName} | Job Portal`;
+
+            document.getElementById('jobTitle').textContent = job.title;
+            document.getElementById('companyName').textContent = job.companyName;
+            document.getElementById('companyNameSidebar').textContent = job.companyName;
+            document.getElementById('jobType').textContent = job.jobType?.replace('_', ' ') || 'Full Time';
+            document.getElementById('experienceLevel').textContent = job.experienceLevel || 'Not Specified';
+            document.getElementById('location').textContent = job.location;
+            document.getElementById('salary').textContent = Utils.formatSalary(job.minSalary, job.maxSalary);
+            document.getElementById('description').innerHTML = formatText(job.description);
+            document.getElementById('requirements').innerHTML = formatText(job.requirements || 'Not specified');
+            document.getElementById('postedDate').textContent = Utils.formatDate(job.postedDate);
+            document.getElementById('deadline').textContent = job.deadline ? Utils.formatDate(job.deadline) : 'Open';
+            document.getElementById('vacancies').textContent = job.vacancies || 'Not Specified';
+            document.getElementById('views').textContent = (job.viewCount || 0) + ' views';
+
+            // Remote badge
+            const remoteEl = document.getElementById('remote');
+            if (job.isRemote) {
+                remoteEl.textContent = 'Remote';
+                remoteEl.classList.remove('d-none');
+            } else {
+                remoteEl.classList.add('d-none');
+            }
+
+            // Skills
+            if (job.skills) {
+                const skillsHtml = job.skills.split(',').map(skill =>
+                    `<span class="badge bg-light text-dark me-1 mb-1">${skill.trim()}</span>`
+                ).join('');
+                document.getElementById('skills').innerHTML = skillsHtml;
+            }
+
+            // Update apply button based on auth
+            updateApplyButton();
+        }
+
+        function formatText(text) {
+            if (!text) return '<p class="text-muted">Not specified</p>';
+            return text.split('\n').map(p => `<p>${p}</p>`).join('');
+        }
+
+        function showNotFound() {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('notFound').classList.remove('d-none');
+        }
+
+        function updateApplyButton() {
+            const btn = document.getElementById('applyBtn');
+
+            if (!Auth.isLoggedIn()) {
+                btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Login to Apply';
+                btn.onclick = () => window.location.href = '/login';
+            } else if (Auth.getUser().role !== 'JOB_SEEKER') {
+                btn.disabled = true;
+                btn.textContent = 'Only Job Seekers Can Apply';
+            }
+        }
+
+        function applyForJob() {
+            if (!Auth.isLoggedIn()) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('applyModal'));
+            modal.show();
+        }
+
+        document.getElementById('applyForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const applicationData = {
+                jobId: parseInt(jobId),
+                coverLetter: document.getElementById('coverLetter').value
+            };
+
+            try {
+                const result = await API.post('/applications/apply', applicationData);
+
+                if (result.success) {
+                    Utils.showToast('Application submitted successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
+
+                    const btn = document.getElementById('applyBtn');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Applied';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-success');
+                } else {
+                    Utils.showToast(result.message || 'Failed to apply', 'error');
+                }
+            } catch (error) {
+                Utils.showToast('Error submitting application', 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

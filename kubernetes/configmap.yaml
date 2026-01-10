@@ -1,0 +1,47 @@
+# ============================================================
+# Job Portal Kubernetes ConfigMap
+# Common configuration for all microservices
+# ============================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jobportal-config
+  namespace: jobportal
+data:
+  # Application settings
+  SPRING_PROFILES_ACTIVE: "kubernetes"
+  
+  # Service URLs
+  AUTH_SERVICE_URL: "http://auth-service:8081"
+  USER_SERVICE_URL: "http://user-service:8082"
+  JOB_SERVICE_URL: "http://job-service:8083"
+  APPLICATION_SERVICE_URL: "http://application-service:8084"
+  ADMIN_SERVICE_URL: "http://admin-service:8085"
+  
+  # Database hosts
+  MYSQL_HOST: "jobportal-mysql.database.svc.cluster.local"
+  MYSQL_PORT: "3306"
+  POSTGRES_HOST: "jobportal-postgresql.database.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  REDIS_HOST: "jobportal-redis.database.svc.cluster.local"
+  REDIS_PORT: "6379"
+  
+  # Logging
+  LOG_LEVEL: "INFO"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jobportal-secrets
+  namespace: jobportal
+type: Opaque
+stringData:
+  # Database credentials (use AWS Secrets Manager in production)
+  MYSQL_USER: "admin"
+  MYSQL_PASSWORD: "CHANGE_ME_IN_PRODUCTION"
+  POSTGRES_USER: "admin"
+  POSTGRES_PASSWORD: "CHANGE_ME_IN_PRODUCTION"
+  
+  # JWT Secret (should be base64 encoded, at least 256 bits)
+  JWT_SECRET: "bXlTdXBlclNlY3JldEtleUZvckpXVFRva2VuR2VuZXJhdGlvbkluSm9iUG9ydGFsU3lzdGVtMjAyNA=="

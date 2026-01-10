@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Portal - Find Your Dream Job</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>JobPortal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/jobs">Browse Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/companies">Companies</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="authButtons">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light ms-2" href="/register">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section d-flex align-items-center"
+        style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container text-center text-white py-5">
+            <h1 class="display-3 fw-bold mb-4">Find Your Dream Job Today</h1>
+            <p class="lead mb-5">Connect with top employers and discover opportunities that match your skills and
+                aspirations</p>
+
+            <!-- Search Box -->
+            <div class="card shadow-lg p-4 mx-auto" style="max-width: 800px;">
+                <form id="searchForm" class="row g-3">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" id="keyword"
+                                placeholder="Job title, skills, or company">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-map-marker-alt text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" id="location" placeholder="Location">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-search me-2"></i>Search Jobs
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Stats -->
+            <div class="row mt-5 pt-4">
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <h2 class="display-4 fw-bold" id="jobCount">500+</h2>
+                        <p class="mb-0">Active Jobs</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <h2 class="display-4 fw-bold" id="companyCount">100+</h2>
+                        <p class="mb-0">Companies</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <h2 class="display-4 fw-bold" id="userCount">10,000+</h2>
+                        <p class="mb-0">Job Seekers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Jobs Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">
+                <i class="fas fa-star text-warning me-2"></i>Featured Jobs
+            </h2>
+            <div class="row" id="featuredJobs">
+                <!-- Jobs will be loaded dynamically -->
+            </div>
+            <div class="text-center mt-4">
+                <a href="/jobs" class="btn btn-outline-primary btn-lg">
+                    View All Jobs <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="p-4">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-user-plus fa-2x"></i>
+                        </div>
+                        <h4>Create Account</h4>
+                        <p class="text-muted">Register as a job seeker or recruiter to get started</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="p-4">
+                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-search fa-2x"></i>
+                        </div>
+                        <h4>Search & Apply</h4>
+                        <p class="text-muted">Browse jobs and apply with your resume</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="p-4">
+                        <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-handshake fa-2x"></i>
+                        </div>
+                        <h4>Get Hired</h4>
+                        <p class="text-muted">Connect with employers and land your dream job</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Recruiters Section -->
+    <section class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="mb-4">Are You a Recruiter?</h2>
+                    <p class="lead mb-4">Post job openings and find the best talent for your company. Our platform
+                        connects you with thousands of qualified candidates.</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Post unlimited job
+                            openings</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Access candidate profiles
+                            and resumes</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Manage applications easily
+                        </li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Track hiring progress</li>
+                    </ul>
+                    <a href="/register?role=RECRUITER" class="btn btn-light btn-lg">
+                        <i class="fas fa-building me-2"></i>Register as Recruiter
+                    </a>
+                </div>
+                <div class="col-md-6 text-center">
+                    <i class="fas fa-users-cog" style="font-size: 200px; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="fas fa-briefcase me-2"></i>JobPortal</h5>
+                    <p class="small">Your gateway to finding the perfect job or the ideal candidate.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="/jobs" class="text-white-50">Browse Jobs</a></li>
+                        <li><a href="/companies" class="text-white-50">Companies</a></li>
+                        <li><a href="/register" class="text-white-50">Register</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6>Contact Us</h6>
+                    <ul class="list-unstyled small text-white-50">
+                        <li><i class="fas fa-envelope me-2"></i>support@jobportal.com</li>
+                        <li><i class="fas fa-phone me-2"></i>+91 1234567890</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-light">
+            <div class="text-center small">
+                <p class="mb-0">&copy; 2024 Job Portal Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    <script>
+        // Load featured jobs on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            loadFeaturedJobs();
+        });
+
+        async function loadFeaturedJobs() {
+            try {
+                const response = await fetch('/api/jobs/recent?limit=6');
+                const result = await response.json();
+                if (result.success && result.data) {
+                    displayJobs(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+            }
+        }
+
+        function displayJobs(jobs) {
+            const container = document.getElementById('featuredJobs');
+            container.innerHTML = jobs.map(job => `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">${job.jobType || 'Full Time'}</span>
+                                ${job.isRemote ? '<span class="badge bg-success">Remote</span>' : ''}
+                            </div>
+                            <h5 class="card-title">${job.title}</h5>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-building me-2"></i>${job.companyName}
+                            </p>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt me-2"></i>${job.location}
+                            </p>
+                            <p class="text-muted mb-3">
+                                <i class="fas fa-rupee-sign me-2"></i>${formatSalary(job.minSalary, job.maxSalary)}
+                            </p>
+                            <div class="mb-3">
+                                ${job.skills.split(',').slice(0, 3).map(skill =>
+                `<span class="badge bg-light text-dark me-1">${skill.trim()}</span>`
+            ).join('')}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <a href="/jobs/${job.jobId}" class="btn btn-outline-primary w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatSalary(min, max) {
+            if (!min && !max) return 'Not Disclosed';
+            const formatNum = (num) => {
+                if (num >= 100000) return (num / 100000).toFixed(1) + ' LPA';
+                return num.toLocaleString();
+            };
+            if (min && max) return `${formatNum(min)} - ${formatNum(max)}`;
+            return min ? formatNum(min) : formatNum(max);
+        }
+
+        // Search form submission
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const keyword = document.getElementById('keyword').value;
+            const location = document.getElementById('location').value;
+            window.location.href = `/jobs?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+        });
+    </script>
+</body>
+
+</html>
