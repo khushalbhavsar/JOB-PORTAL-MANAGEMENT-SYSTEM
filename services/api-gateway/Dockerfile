@@ -1,28 +1,12 @@
-# Build stage
-FROM eclipse-temurin:17-jdk-alpine AS build
-WORKDIR /app
-
-# Copy maven wrapper and pom.xml
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-
-# Download dependencies (cached layer)
-RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
-
-# Copy source code and build
-COPY src src
-RUN ./mvnw clean package -DskipTests -B
-
-# Runtime stage
+# Runtime stage - uses pre-built JAR from CI pipeline
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Add non-root user for security
 RUN addgroup -g 1001 -S appgroup && adduser -u 1001 -S appuser -G appgroup
 
-# Copy jar from build stage
-COPY --from=build /app/target/*.jar app.jar
+# Copy pre-built jar
+COPY target/*.jar app.jar
 
 # Change ownership
 RUN chown -R appuser:appgroup /app
