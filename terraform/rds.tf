@@ -91,7 +91,7 @@ resource "aws_db_instance" "postgresql" {
   storage_encrypted    = true
 
   db_name  = "jobportal_jobs"
-  username = var.db_username
+  username = var.postgres_username
   password = var.db_password
 
   vpc_security_group_ids = [aws_security_group.rds.id]
