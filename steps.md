@@ -258,7 +258,7 @@ aws configure
 # Enter:
 # - AWS Access Key ID
 # - AWS Secret Access Key
-# - Default region (e.g., us-west-2)
+# - Default region (e.g., us-east-1)
 # - Default output format (json)
 
 # Verify configuration
@@ -275,7 +275,7 @@ Add these secrets:
 | ----------------------- | ------------------- | ---------------------- |
 | `AWS_ACCESS_KEY_ID`     | AWS Access Key      | `AKIA...`              |
 | `AWS_SECRET_ACCESS_KEY` | AWS Secret Key      | `wJalrXUt...`          |
-| `AWS_REGION`            | AWS Region          | `us-west-2`            |
+| `AWS_REGION`            | AWS Region          | `us-east-1`            |
 | `AWS_ACCOUNT_ID`        | AWS Account ID      | `123456789012`         |
 | `DB_PASSWORD`           | MySQL Root Password | `your-secure-password` |
 | `JWT_SECRET`            | JWT Signing Key     | `your-jwt-secret-key`  |
@@ -348,7 +348,7 @@ This creates:
 terraform output cluster_name
 
 # Update kubeconfig
-aws eks update-kubeconfig --region us-west-2 --name $(terraform output -raw cluster_name)
+aws eks update-kubeconfig --region us-east-1 --name $(terraform output -raw cluster_name)
 
 # Verify connection
 kubectl get nodes
@@ -616,7 +616,7 @@ terraform destroy --auto-approve
 
 ```bash
 # Delete ECR repository
-aws ecr delete-repository --repository-name job-portal --force --region us-west-2
+aws ecr delete-repository --repository-name job-portal --force --region us-east-1
 ```
 
 ### **Remove GitHub Secrets**
@@ -628,9 +628,9 @@ aws ecr delete-repository --repository-name job-portal --force --region us-west-
 
 ```bash
 # Verify no resources remain
-aws eks list-clusters --region us-west-2
-aws rds describe-db-instances --region us-west-2
-aws ecr describe-repositories --region us-west-2
+aws eks list-clusters --region us-east-1
+aws rds describe-db-instances --region us-east-1
+aws ecr describe-repositories --region us-east-1
 ```
 
 ---
