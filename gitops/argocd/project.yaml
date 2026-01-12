@@ -12,7 +12,7 @@ spec:
 
   # Source repositories
   sourceRepos:
-    - 'https://github.com/YOUR_USERNAME/job-portal-gitops.git'
+    - 'https://github.com/khushalbhavsar/JOB-PORTAL-MANAGEMENT-SYSTEM.git'
 
   # Destination clusters and namespaces
   destinations:

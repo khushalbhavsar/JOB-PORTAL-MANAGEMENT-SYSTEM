@@ -34,7 +34,7 @@ spec:
     spec:
       project: jobportal
       source:
-        repoURL: https://github.com/YOUR_USERNAME/job-portal-gitops.git
+        repoURL: https://github.com/khushalbhavsar/JOB-PORTAL-MANAGEMENT-SYSTEM.git
         targetRevision: main
         path: '{{path}}'
         helm:
