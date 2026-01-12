@@ -57,9 +57,6 @@ module "eks" {
   # Enable IRSA
   enable_irsa = true
 
-  # Cluster access
-  manage_aws_auth_configmap = true
-
   tags = {
     Name = "${var.project_name}-eks"
   }
