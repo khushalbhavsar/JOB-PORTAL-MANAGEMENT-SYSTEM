@@ -1,6 +1,6 @@
-# Job Portal Management System - GitOps Deployment Guide
+# Job Portal Management System - GitOps 
+Deployment Guide
 
-![Banner](./docs/images/banner.png)
 
 <div align="center">
 
@@ -151,27 +151,44 @@ graph LR
 ### **Quick Installation Scripts**
 
 <details>
-<summary><strong>🔧 One-Click Installation (Linux/macOS)</strong></summary>
+<summary><strong>🔧 One-Click Installation (Amazon Linux EC2)</strong></summary>
 
 ```bash
 #!/bin/bash
-# Install all prerequisites
+# Install all prerequisites on Amazon Linux 2023 / Amazon Linux 2
 
-# Java 17
-sudo apt install openjdk-17-jdk -y
+# Update system packages
+sudo yum update -y
+
+# Install required utilities
+sudo yum install -y wget unzip git tar gzip
+
+# Java 17 (Amazon Corretto - AWS's distribution of OpenJDK)
+sudo yum install -y java-17-amazon-corretto-devel
+
+# Set JAVA_HOME
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto' | sudo tee -a /etc/profile.d/java.sh
+echo 'export PATH=$PATH:$JAVA_HOME/bin' | sudo tee -a /etc/profile.d/java.sh
+source /etc/profile.d/java.sh
 
 # Maven
-sudo apt install maven -y
+sudo yum install -y maven
+# Or install latest version manually:
+# wget https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+# sudo tar -xzf apache-maven-3.9.6-bin.tar.gz -C /opt
+# sudo ln -s /opt/apache-maven-3.9.6/bin/mvn /usr/local/bin/mvn
 
-# AWS CLI
+# AWS CLI (pre-installed on Amazon Linux, but update to latest)
+sudo yum remove -y awscli  # Remove v1 if present
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
-sudo ./aws/install
+sudo ./aws/install --update
+rm -rf aws awscliv2.zip
 
 # Terraform
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update && sudo apt-get install terraform
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum install -y terraform
 
 # kubectl
 curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
@@ -179,8 +196,76 @@ chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
 
 # Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+sudo yum install -y docker
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+
+# Helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Apply group changes (logout/login required, or use newgrp)
+newgrp docker
+
+# Verify installations
+echo "=== Verifying Installations ==="
+java --version
+mvn --version
+aws --version
+terraform --version
+kubectl version --client
+docker --version
+helm version
+echo "=== All tools installed successfully! ==="
+```
+
+**Note:** After running the script, log out and log back in for Docker group permissions to take effect, or run `newgrp docker`.
+
+</details>
+
+<details>
+<summary><strong>🔧 Amazon Linux 2 Specific Installation</strong></summary>
+
+```bash
+#!/bin/bash
+# Install all prerequisites on Amazon Linux 2
+
+# Update system
+sudo yum update -y
+
+# Install amazon-linux-extras for additional packages
+sudo amazon-linux-extras install -y java-openjdk17
+sudo amazon-linux-extras install -y docker
+
+# Enable and start Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+
+# Install Git
+sudo yum install -y git
+
+# Maven (install manually as not available in amazon-linux-extras)
+wget https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+sudo tar -xzf apache-maven-3.9.6-bin.tar.gz -C /opt
+sudo ln -s /opt/apache-maven-3.9.6/bin/mvn /usr/local/bin/mvn
+rm apache-maven-3.9.6-bin.tar.gz
+
+# AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf aws awscliv2.zip
+
+# Terraform
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum install -y terraform
+
+# kubectl
+curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
 
 # Helm
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
@@ -226,6 +311,42 @@ helm version
 - **AWS Account** with appropriate permissions
 - **IAM User/Role** with EKS, ECR, RDS, VPC permissions
 
+### **EC2 Instance Requirements (Recommended)**
+
+| Resource         | Minimum     | Recommended  |
+| ---------------- | ----------- | ------------ |
+| **Instance Type**| t3.medium   | t3.large     |
+| **Storage**      | 30 GB EBS   | 50 GB EBS    |
+| **AMI**          | Amazon Linux 2023 or Amazon Linux 2 |
+| **Security Group**| SSH (22), HTTP (80), HTTPS (443) |
+
+**EC2 IAM Role Permissions (attach to EC2 instance):**
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "eks:*",
+                "ecr:*",
+                "rds:*",
+                "ec2:*",
+                "elasticloadbalancing:*",
+                "iam:PassRole",
+                "iam:CreateServiceLinkedRole",
+                "secretsmanager:*",
+                "s3:*",
+                "dynamodb:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+> **💡 Tip:** Using an IAM Role attached to EC2 is more secure than storing AWS credentials on the instance.
+
 ---
 
 ## 🔧 Installation
@@ -251,8 +372,22 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 ### **Step 3: Configure AWS**
 
+**Option A: Using EC2 Instance Role (Recommended)**
+
+If your EC2 instance has an IAM role attached, AWS CLI will automatically use those credentials:
+
 ```bash
-# Configure AWS CLI
+# Verify EC2 instance role is working
+aws sts get-caller-identity
+
+# Set default region
+aws configure set region us-east-1
+```
+
+**Option B: Using Access Keys (Not recommended for EC2)**
+
+```bash
+# Configure AWS CLI with access keys
 aws configure
 
 # Enter:
@@ -264,6 +399,8 @@ aws configure
 # Verify configuration
 aws sts get-caller-identity
 ```
+
+> **⚠️ Security Note:** For EC2 instances, always prefer using IAM Instance Roles over storing access keys.
 
 ### **Step 4: Setup GitHub Secrets (Required for GitOps)**
 
@@ -354,6 +491,8 @@ aws eks update-kubeconfig --region us-east-1 --name $(terraform output -raw clus
 kubectl get nodes
 kubectl cluster-info
 ```
+
+> **💡 EC2 Tip:** If you get authentication errors, ensure your EC2 instance's IAM role has `eks:DescribeCluster` and `eks:AccessKubernetesApi` permissions.
 
 ### **Phase 3: Deploy RDS Database**
 
@@ -452,11 +591,17 @@ git push origin main
 ```bash
 # Get ArgoCD admin password
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+echo  # Add newline for readability
 
-# Port-forward to ArgoCD UI
-kubectl port-forward svc/argocd-server -n argocd 9090:443 &
+# Port-forward to ArgoCD UI (bind to all interfaces for EC2 access)
+kubectl port-forward svc/argocd-server -n argocd 9090:443 --address 0.0.0.0 &
 
-# Access: https://localhost:9090
+# Access from local machine via SSH tunnel:
+# ssh -i your-key.pem -L 9090:localhost:9090 ec2-user@<EC2-PUBLIC-IP>
+# Then open: https://localhost:9090
+
+# Or access directly (ensure security group allows port 9090):
+# https://<EC2-PUBLIC-IP>:9090
 # Username: admin
 # Password: (from above command)
 ```
@@ -464,13 +609,20 @@ kubectl port-forward svc/argocd-server -n argocd 9090:443 &
 ### **Grafana Dashboard**
 
 ```bash
-# Port-forward to Grafana
-kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80 &
+# Port-forward to Grafana (bind to all interfaces for EC2 access)
+kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80 --address 0.0.0.0 &
 
-# Access: http://localhost:3000
+# Access from local machine via SSH tunnel:
+# ssh -i your-key.pem -L 3000:localhost:3000 ec2-user@<EC2-PUBLIC-IP>
+# Then open: http://localhost:3000
+
+# Or access directly (ensure security group allows port 3000):
+# http://<EC2-PUBLIC-IP>:3000
 # Username: admin
 # Password: prom-operator (or check secret)
 ```
+
+> **🔒 EC2 Security Note:** For production, use SSH tunneling instead of opening ports directly. Add these ports to your EC2 security group only for development/testing.
 
 ### **Application Health Checks**
 
