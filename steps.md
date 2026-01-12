@@ -785,6 +785,126 @@ aws rds describe-db-instances --region us-east-1
 aws ecr describe-repositories --region us-east-1
 ```
 
+### **Check If All Resources Are Destroyed**
+
+Run these commands to verify everything is deleted:
+
+```bash
+# Check EKS Clusters
+aws eks list-clusters --region us-east-1
+
+# Check RDS Instances
+aws rds describe-db-instances --region us-east-1 --query 'DBInstances[*].[DBInstanceIdentifier,DBInstanceStatus]' --output table
+
+# Check ElastiCache (Redis)
+aws elasticache describe-cache-clusters --region us-east-1 --query 'CacheClusters[*].[CacheClusterId,CacheClusterStatus]' --output table
+
+# Check ECR Repositories
+aws ecr describe-repositories --region us-east-1 --query 'repositories[*].repositoryName' --output table
+
+# Check VPCs (excluding default)
+aws ec2 describe-vpcs --region us-east-1 --query 'Vpcs[?Tags[?Key==`Name` && contains(Value, `jobportal`)]].[VpcId,Tags[?Key==`Name`].Value|[0]]' --output table
+
+# Check NAT Gateways
+aws ec2 describe-nat-gateways --region us-east-1 --query 'NatGateways[?State!=`deleted`].[NatGatewayId,State]' --output table
+
+# Check Load Balancers
+aws elbv2 describe-load-balancers --region us-east-1 --query 'LoadBalancers[*].[LoadBalancerName,State.Code]' --output table
+
+# Check Security Groups (jobportal related)
+aws ec2 describe-security-groups --region us-east-1 --query 'SecurityGroups[?contains(GroupName, `jobportal`)].[GroupId,GroupName]' --output table
+```
+
+**Expected Output (If All Destroyed):**
+```
+=== EKS ===
+{ "clusters": [] }
+=== RDS ===
+[]
+=== ElastiCache ===
+[]
+=== ECR ===
+[]
+=== NAT Gateways ===
+[]
+```
+
+### **Manual Cleanup Script (If Terraform Fails)**
+
+<details>
+<summary><strong>🧹 One-Click Manual Cleanup Script</strong></summary>
+
+Create a file called `cleanup.sh` and run it:
+
+```bash
+#!/bin/bash
+REGION="us-east-1"
+
+echo "=== Deleting EKS ==="
+aws eks delete-nodegroup --cluster-name jobportal-eks --nodegroup-name jobportal-node-group --region $REGION 2>/dev/null
+sleep 60
+aws eks delete-cluster --name jobportal-eks --region $REGION 2>/dev/null
+
+echo "=== Deleting RDS ==="
+aws rds delete-db-instance --db-instance-identifier jobportal-mysql --skip-final-snapshot --delete-automated-backups --region $REGION 2>/dev/null
+aws rds delete-db-instance --db-instance-identifier jobportal-postgresql --skip-final-snapshot --delete-automated-backups --region $REGION 2>/dev/null
+
+echo "=== Deleting ElastiCache ==="
+aws elasticache delete-cache-cluster --cache-cluster-id jobportal-redis --region $REGION 2>/dev/null
+
+echo "=== Deleting ECR ==="
+for repo in api-gateway auth-service job-service application-service user-service admin-service; do
+  aws ecr delete-repository --repository-name jobportal/$repo --force --region $REGION 2>/dev/null
+done
+
+echo "=== Deleting NAT Gateways ==="
+for nat in $(aws ec2 describe-nat-gateways --region $REGION --query 'NatGateways[?State!=`deleted`].NatGatewayId' --output text); do
+  aws ec2 delete-nat-gateway --nat-gateway-id $nat --region $REGION
+done
+
+echo "=== Deleting Load Balancers ==="
+for lb in $(aws elbv2 describe-load-balancers --region $REGION --query 'LoadBalancers[*].LoadBalancerArn' --output text); do
+  aws elbv2 delete-load-balancer --load-balancer-arn $lb --region $REGION
+done
+
+echo "=== Waiting for resources to delete (2 minutes) ==="
+sleep 120
+
+echo "=== Deleting VPC ==="
+VPC_ID=$(aws ec2 describe-vpcs --region $REGION --query 'Vpcs[?Tags[?Key==`Name` && contains(Value, `jobportal`)]].VpcId' --output text)
+if [ -n "$VPC_ID" ]; then
+  # Delete subnets
+  for subnet in $(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text --region $REGION); do
+    aws ec2 delete-subnet --subnet-id $subnet --region $REGION 2>/dev/null
+  done
+  # Delete security groups
+  for sg in $(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text --region $REGION); do
+    aws ec2 delete-security-group --group-id $sg --region $REGION 2>/dev/null
+  done
+  # Delete internet gateway
+  for igw in $(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[*].InternetGatewayId' --output text --region $REGION); do
+    aws ec2 detach-internet-gateway --internet-gateway-id $igw --vpc-id $VPC_ID --region $REGION
+    aws ec2 delete-internet-gateway --internet-gateway-id $igw --region $REGION
+  done
+  # Delete route tables
+  for rt in $(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[?Main!=`true`]].RouteTableId' --output text --region $REGION); do
+    aws ec2 delete-route-table --route-table-id $rt --region $REGION 2>/dev/null
+  done
+  # Delete VPC
+  aws ec2 delete-vpc --vpc-id $VPC_ID --region $REGION
+fi
+
+echo "=== DONE! ==="
+```
+
+**Run the script:**
+```bash
+chmod +x cleanup.sh
+./cleanup.sh
+```
+
+</details>
+
 ---
 
 ## 🔬 Advanced Topics
