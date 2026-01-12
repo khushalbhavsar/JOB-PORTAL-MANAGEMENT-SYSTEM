@@ -3,7 +3,7 @@
 replicaCount: 2
 
 image:
-  repository: jobportal/api-gateway
+  repository: jobportal/api-gateway 
   pullPolicy: IfNotPresent
   tag: "latest"
 
