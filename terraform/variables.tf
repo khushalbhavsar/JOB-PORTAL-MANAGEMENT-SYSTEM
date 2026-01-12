@@ -86,4 +86,5 @@ variable "db_password" {
   description = "Database master password (no /, @, \", or spaces allowed)"
   type        = string
   sensitive   = true
+  default     = "Khushal!41"  # Change this in production
 }

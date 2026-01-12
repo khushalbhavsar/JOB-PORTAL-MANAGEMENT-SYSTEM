@@ -4,7 +4,7 @@
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
+  version = "~> 20.0"
 
   cluster_name    = "${var.project_name}-eks"
   cluster_version = var.eks_cluster_version
@@ -12,6 +12,9 @@ module "eks" {
   vpc_id                         = module.vpc.vpc_id
   subnet_ids                     = module.vpc.private_subnets
   cluster_endpoint_public_access = true
+
+  # Allow access from EC2 instance
+  enable_cluster_creator_admin_permissions = true
 
   # EKS Add-ons
   cluster_addons = {
@@ -25,7 +28,8 @@ module "eks" {
       most_recent = true
     }
     aws-ebs-csi-driver = {
-      most_recent = true
+      most_recent              = true
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
     }
   }
 
@@ -58,6 +62,26 @@ module "eks" {
 
   tags = {
     Name = "${var.project_name}-eks"
+  }
+}
+
+# IAM Role for EBS CSI Driver
+module "ebs_csi_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0"
+
+  role_name             = "${var.project_name}-ebs-csi-role"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+
+  tags = {
+    Name = "${var.project_name}-ebs-csi-role"
   }
 }
 
